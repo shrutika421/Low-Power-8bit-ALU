@@ -1,0 +1,50 @@
+module tb_alu_8bit;
+    reg clk;
+    reg enable;
+    reg [7:0] A;
+    reg [7:0] B;
+    reg [2:0] opcode;
+
+    wire [7:0] result;
+    wire carry_out;
+    wire zero_flag;
+
+    alu_8bit uut (
+        .clk(clk),
+        .enable(enable),
+        .A(A),
+        .B(B),
+        .opcode(opcode),
+        .result(result),
+        .carry_out(carry_out),
+        .zero_flag(zero_flag)
+    );
+         always #5 clk = ~clk;
+
+        initial begin
+        // Initialize Input
+        clk = 0;
+        enable = 0;
+        A = 8'd0;
+        B = 8'd0;
+        opcode = 3'b000;
+
+        #10;
+        enable = 1; // Enable ALU
+
+        // Test Addition
+        A = 8'd15; B = 8'd10; opcode = 3'b000; #10;
+        
+        // Test Subtraction
+        A = 8'd20; B = 8'd5;  opcode = 3'b001; #10;
+        
+        // Test AND
+        A = 8'hFF; B = 8'h0F; opcode = 3'b010; #10;
+
+        // Low Power Test: Disable clock gating
+        enable = 0;
+        A = 8'd50; B = 8'd50; opcode = 3'b000; #20;
+
+        $finish;
+    end
+endmodule
