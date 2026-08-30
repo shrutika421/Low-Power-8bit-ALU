@@ -1,0 +1,34 @@
+8-Bit Low-Power ALU with Clock Gating
+module alu_8bit (
+    input wire clk,
+    input wire enable,          
+    input wire [7:0] A,
+    input wire [7:0] B,
+    input wire [2:0] opcode,    
+    output reg [7:0] result,
+    output reg carry_out,
+    output reg zero_flag
+);
+
+    wire gated_clk;
+
+    // Clock Gating Logic
+    assign gated_clk = clk & enable;
+
+    always @(posedge gated_clk) begin
+        case (opcode)
+            3'b000: {carry_out, result} <= A + B;       // Addition
+            3'b001: {carry_out, result} <= A - B;       // Subtraction
+            3'b010: begin result <= A & B; carry_out <= 0; end // AND
+            3'b011: begin result <= A | B; carry_out <= 0; end // OR
+            3'b100: begin result <= A ^ B; carry_out <= 0; end // XOR
+            3'b101: begin result <= ~A;    carry_out <= 0; end // NOT A
+            3'b110: begin result <= A << 1; carry_out <= A[7]; end // Shift Left
+            3'b111: begin result <= A >> 1; carry_out <= A[0]; end // Shift Right
+            default: begin result <= 8'h00; carry_out <= 0; end
+        endcase
+        
+        zero_flag <= ((opcode == 3'b000 && (A + B) == 0) || 
+                      (opcode == 3'b001 && (A - B) == 0)) ? 1'b1 : 1'b0;
+    end
+endmodule
